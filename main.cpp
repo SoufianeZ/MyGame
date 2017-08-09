@@ -11,7 +11,11 @@
 #include <stdio.h>
 
 const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_HEIGHT = 780;
+
+typedef struct {
+    int x, y;
+}Plane;
 
 int main(int argc, const char * argv[]) {
     
@@ -24,23 +28,58 @@ int main(int argc, const char * argv[]) {
     
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    Plane plane;
+    plane.x = SCREEN_WIDTH/2;
+    plane.y = SCREEN_HEIGHT-40;
+
+    int done = 0;
+    SDL_Event event;
     
-    SDL_RenderClear(renderer);
-    
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    
-    SDL_Rect rect = { 220, 140, 200, 200 };
-    SDL_RenderFillRect(renderer, &rect);
+    while (!done) {
         
-    SDL_RenderPresent(renderer);
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_WINDOWEVENT_CLOSE:
+                    done = 1;
+                    break;
+                case SDL_QUIT:
+                    done = 1;
+                    break;
+            }
+        }
+        
+        const Uint8 *state = SDL_GetKeyboardState(NULL);
+        if (state[SDL_SCANCODE_LEFT]){
+            plane.x--;
+        }
+        if (state[SDL_SCANCODE_RIGHT]){
+            plane.x++;
+        }
+        if (state[SDL_SCANCODE_UP]){
+            plane.y -= 0.5;
+        }
+        if (state[SDL_SCANCODE_DOWN]){
+            plane.y++;
+        }
+        
+        SDL_SetRenderDrawColor(renderer, 0, 50, 100, 255);
+        
+        SDL_RenderClear(renderer);
+        
+        SDL_SetRenderDrawColor(renderer, 100, 50, 25, 255);
+        
+        SDL_Rect rect = { plane.x, plane.y, 20, 20 };
+        SDL_RenderFillRect(renderer, &rect);
+        
+        SDL_RenderPresent(renderer);
+        
+    }
     
-    SDL_Delay(2000);
+    SDL_Delay(10);
     
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     
     SDL_Quit();
     return 0;
-    
 }
